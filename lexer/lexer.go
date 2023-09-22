@@ -15,6 +15,7 @@ func New(input string) *Lexer {
 	return l
 }
 
+// NextToken lê e retorna o próximo token
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
@@ -82,6 +83,7 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
+// return the current char
 func (l *Lexer) readChar() {
 	if l.readPosition >= (len(l.input)) {
 		l.ch = 0
@@ -92,6 +94,7 @@ func (l *Lexer) readChar() {
 	l.readPosition += 1
 }
 
+// return the next char
 func (l *Lexer) peekChar() byte {
 	if l.readPosition >= len(l.input) {
 		return 0
@@ -100,6 +103,7 @@ func (l *Lexer) peekChar() byte {
 	}
 }
 
+// read an entire number
 func (l *Lexer) readNumber() string {
 	position := l.position
 	for isDigit(l.ch) {
@@ -108,16 +112,19 @@ func (l *Lexer) readNumber() string {
 	return l.input[position:l.position]
 }
 
+// skip ' ', '\t', '\n' e '\r'
 func (l *Lexer) skipWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
 		l.readChar()
 	}
 }
 
+// cria um Token
 func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
 }
 
+// read an entire identifier
 func (l *Lexer) readIdentifier() string {
 	position := l.position
 	for isLetter(l.ch) {
@@ -126,10 +133,12 @@ func (l *Lexer) readIdentifier() string {
 	return l.input[position:l.position]
 }
 
+// true if a-z, A-Z ou _
 func isLetter(ch byte) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
 }
 
+// true if 0-9
 func isDigit(ch byte) bool {
 	return '0' <= ch && ch <= '9'
 }
