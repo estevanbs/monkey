@@ -55,7 +55,7 @@ var keywords = map[string]TokenType{
 	"return": RETURN,
 }
 
-// LookupIdent return the identifier of a keyword
+// LookupIdent return the TokenType of a string
 func LookupIdent(ident string) TokenType {
 	if tok, ok := keywords[ident]; ok {
 		return tok
