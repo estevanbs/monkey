@@ -1,12 +1,15 @@
 package lexer
 
-import "monkey/token"
+import (
+	"monkey/token"
+	"unicode"
+)
 
 type Lexer struct {
 	input        string
 	position     int
 	readPosition int
-	ch           byte
+	ch           rune
 }
 
 func New(input string) *Lexer {
@@ -15,7 +18,7 @@ func New(input string) *Lexer {
 	return l
 }
 
-// NextToken lê e retorna o próximo token
+// NextToken each time called, return the next token from the input
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
@@ -66,11 +69,11 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Literal = ""
 		tok.Type = token.EOF
 	default:
-		if isLetter(l.ch) {
+		if unicode.IsLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
 			return tok
-		} else if isDigit(l.ch) {
+		} else if unicode.IsDigit(l.ch) {
 			tok.Type = token.INT
 			tok.Literal = l.readNumber()
 			return tok
@@ -83,62 +86,51 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
-// return the current char
+// store current char value on ch and increments position and readPosition
 func (l *Lexer) readChar() {
-	if l.readPosition >= (len(l.input)) {
-		l.ch = 0
+	if l.readPosition >= len(l.input) {
+		l.ch = 0 // unicode for NUL
 	} else {
-		l.ch = l.input[l.readPosition]
+		l.ch = rune(l.input[l.readPosition])
 	}
 	l.position = l.readPosition
 	l.readPosition += 1
 }
 
 // return the next char
-func (l *Lexer) peekChar() byte {
+func (l *Lexer) peekChar() rune {
 	if l.readPosition >= len(l.input) {
 		return 0
 	} else {
-		return l.input[l.readPosition]
+		return rune(l.input[l.readPosition])
 	}
 }
 
 // read an entire number
 func (l *Lexer) readNumber() string {
 	position := l.position
-	for isDigit(l.ch) {
+	for unicode.IsDigit(l.ch) {
 		l.readChar()
 	}
 	return l.input[position:l.position]
-}
-
-// skip ' ', '\t', '\n' e '\r'
-func (l *Lexer) skipWhitespace() {
-	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
-		l.readChar()
-	}
-}
-
-// cria um Token
-func newToken(tokenType token.TokenType, ch byte) token.Token {
-	return token.Token{Type: tokenType, Literal: string(ch)}
 }
 
 // read an entire identifier
 func (l *Lexer) readIdentifier() string {
 	position := l.position
-	for isLetter(l.ch) {
+	for unicode.IsLetter(l.ch) {
 		l.readChar()
 	}
 	return l.input[position:l.position]
 }
 
-// true if a-z, A-Z ou _
-func isLetter(ch byte) bool {
-	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+// call readChar until finds a non whitespace char
+func (l *Lexer) skipWhitespace() {
+	for unicode.IsSpace(l.ch) {
+		l.readChar()
+	}
 }
 
-// true if 0-9
-func isDigit(ch byte) bool {
-	return '0' <= ch && ch <= '9'
+func newToken(tokenType token.TokenType, ch rune) token.Token {
+	return token.Token{Type: tokenType, Literal: string(ch)}
 }
