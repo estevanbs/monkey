@@ -18,7 +18,7 @@ func New(input string) *Lexer {
 	return l
 }
 
-// NextToken each time called, return the next token from the input
+// NextToken each time called, return the next token from the input and increments position and readPosition
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
